@@ -2,7 +2,8 @@ import dotenv from "dotenv";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "url";
-import { Client, GatewayIntentBits, Collection, Events } from "discord.js";
+import { Client, GatewayIntentBits, Collection } from "discord.js";
+import cron from "node-cron";
 
 dotenv.config();
 
@@ -49,52 +50,34 @@ for (let index in commandFolders) {
   }
 }
 
-client.on(Events.InteractionCreate, (interaction) => {
-  if (!interaction.isCommand()) return;
-});
+const eventsPath = path.join(__dirname, "events");
+const eventFiles = fs
+  .readdirSync(eventsPath)
+  .filter((file) => file.endsWith(".js"));
 
-client.on(Events.InteractionCreate, async (interaction) => {
-  if (!interaction.isCommand()) return;
-
-  const command = interaction.client.commands.get(interaction.commandName);
-
-  if (!command) {
-    console.log(
-      `[WARNING] The command ${interaction.commandName} does not exist!`
-    );
-    return;
+for (const i in eventFiles) {
+  const file = eventFiles[i];
+  const filePath = path.join(eventsPath, file);
+  const event = await import(filePath);
+  if (event.once) {
+    client.once(event.name, (...args) => event.handler(...args));
+  } else {
+    client.on(event.name, (...args) => event.handler(...args));
   }
+}
 
-  try {
-    await command.handler(interaction);
-    console.log(`[INFO] Executed ${interaction.commandName} command!`);
-  } catch (error) {
-    console.error(error);
+cron.schedule(
+  "* * * * *",
+  () => {
+    console.log("This task runs every minute");
+    // client.channels.cache
+    //   .get("889918528810541568")
+    //   .send("Bom dia, pessoal! :sunrise:");
+  },
+  { timezone: "UTC+05:45" }
+);
 
-    if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({
-        content: "There was an error while executing this command!",
-        ephemeral: true,
-      });
-    } else {
-      await interaction.reply({
-        content: "There was an error while executing this command!",
-        ephemeral: true,
-      });
-    }
-  }
-});
-
-client.on("messageCreate", (message) => {
-  if (message.author.bot) return;
-
-  const { content, author } = message;
-  const { username, globalName: name } = author;
-
-  console.log(`[${name}]: ${content}`);
-  message.reply({
-    content: `Hello ${username}!`,
-  });
-});
+const channel = client.channels.cache.get("1150834404231495850");
+console.log("🚀 ~ file: index.js:77 ~ channel:", channel);
 
 client.login(token);
