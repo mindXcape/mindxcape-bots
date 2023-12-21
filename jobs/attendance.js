@@ -5,6 +5,9 @@ import {
   ComponentType,
 } from "discord.js";
 import Attendance from "../models/attendance.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 async function handleAttendance(i) {
   if (i.user.bot || i.user.system) return;
@@ -43,7 +46,11 @@ async function handleAttendance(i) {
 }
 
 export async function scheduleAttendanceEvent(client) {
-  const channel = client.channels.cache.get("1184903965960306808");
+  const channel = client.channels.cache.get(process.env.ATTENDANCE_CHANNEL_ID);
+  if (!channel) {
+    console.log("Attendance channel not found");
+    process.exit(1);
+  }
 
   const confirm = new ButtonBuilder()
     .setCustomId("Present")
