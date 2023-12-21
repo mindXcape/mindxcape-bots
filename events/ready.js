@@ -10,5 +10,5 @@ export const once = true;
 export async function handler(client) {
   Attendance.sync();
   console.log(`Ready! Logged in as ${client.user.tag}`);
-  // await scheduleEvent(scheduleAttendanceEvent(client));
+  await scheduleEvent(scheduleAttendanceEvent(client));
 }
