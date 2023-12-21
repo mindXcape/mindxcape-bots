@@ -1,10 +1,14 @@
-import { Events, GuildScheduledEvent } from "discord.js";
+import { Events } from "discord.js";
 
 export const name = Events.InteractionCreate;
 
 export async function handler(interaction) {
   if (interaction.isChatInputCommand()) {
     const command = interaction.client.commands.get(interaction.commandName);
+    console.log(
+      `[INFO] attendance channel!`,
+      interaction.client.channel.attendance
+    );
 
     if (!command) {
       console.log(

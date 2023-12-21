@@ -1,9 +1,9 @@
 import dotenv from "dotenv";
 import fs from "node:fs";
 import path from "node:path";
+import db from "./config/db.config.js";
 import { fileURLToPath } from "url";
 import { Client, GatewayIntentBits, Collection } from "discord.js";
-import cron from "node-cron";
 
 dotenv.config();
 
@@ -21,6 +21,7 @@ const client = new Client({
 });
 
 client.commands = new Collection();
+client.channel = new Collection();
 
 const folderPath = path.join(__dirname, "commands");
 const commandFolders = fs.readdirSync(folderPath);
@@ -66,18 +67,13 @@ for (const i in eventFiles) {
   }
 }
 
-cron.schedule(
-  "* * * * *",
-  () => {
-    console.log("This task runs every minute");
-    // client.channels.cache
-    //   .get("889918528810541568")
-    //   .send("Bom dia, pessoal! :sunrise:");
-  },
-  { timezone: "UTC+05:45" }
-);
-
-const channel = client.channels.cache.get("1150834404231495850");
-console.log("🚀 ~ file: index.js:77 ~ channel:", channel);
-
 client.login(token);
+
+db.authenticate()
+  .then(() => {
+    console.log("Database connection has been established successfully.");
+  })
+  .catch((error) => {
+    console.error("Unable to connect to the database:", error);
+    process.exit(1);
+  });
