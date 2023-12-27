@@ -65,7 +65,7 @@ export async function scheduleAttendanceEvent(client) {
   const row = new ActionRowBuilder().addComponents(confirm, cancel);
 
   const response = await channel.send({
-    content: `Please confirm your attendance for ${new Date().toLocaleDateString()}. Attendance will be closed after 1 hour.`,
+    content: `Please confirm your attendance for ${new Date().toLocaleDateString()}. Attendance will be closed after 15 Minute.`,
     components: [row],
   });
 
@@ -75,7 +75,7 @@ export async function scheduleAttendanceEvent(client) {
 
   const collector = response.createMessageComponentCollector({
     componentType: ComponentType.Button,
-    time: 3_600_000,
+    time: 900_000, // 15 minute
   });
 
   collector.on("collect", async (i) => {
